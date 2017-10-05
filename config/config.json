@@ -1,0 +1,16 @@
+{
+    "env": {
+        "development": {
+            "port": 5000
+        },
+        "staging": {
+            "port": 5001
+        },
+        "production": {
+            "port": 5002
+        }
+    },
+    "FB_VERIFY_TOKEN": "tobicasebottoken",
+    "FB_PAGE_TOKEN": "EAABubraSrAcBAJMB399w1oEp4FAJZCV1wa27aPeKkrPmHV4RMpHLfacTgyvgVgISDObvmlmitLE6EMC37JZAIwpX18rkZBG9dZC4BycNG0TiGX8GY05hWqEVfXX1s7EZCjZC2ZCNza90bhvcL710TwsafHFpaATqaPeMw1jFcZBe6WCoty5GDtkq",
+    "API_AI_CLIENT_ACCESS_TOKEN": "ffe9096217f343a9b41b56352886ffbc"
+}
