@@ -237,7 +237,6 @@ var handleApiAiResponse = function(sender, response) {
                     })
                     .catch(console.error);
             })
-
             return waitForHandleMsg;
         }, Promise.resolve());
     } else if (responseText === '' && !isDefined(action)) {
