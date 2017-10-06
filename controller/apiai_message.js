@@ -21,7 +21,7 @@ var sendAction = function(recipientId, action) {
         },
         sender_action: action
     };
-    fb_message.callSendAPI(messageData);
+    return fb_message.callSendAPI(messageData);
 };
 
 var sendTextMessage = function(recipientId, text) {
@@ -33,7 +33,7 @@ var sendTextMessage = function(recipientId, text) {
             text: text
         }
     }
-    fb_message.callSendAPI(messageData);
+    return fb_message.callSendAPI(messageData);
 };
 
 /*
@@ -52,7 +52,7 @@ function sendQuickReply(recipientId, text, replies, metadata) {
         }
     };
 
-    fb_message.callSendAPI(messageData);
+    return fb_message.callSendAPI(messageData);
 }
 
 /*
@@ -74,7 +74,7 @@ function sendImageMessage(recipientId, imageUrl) {
         }
     };
 
-    fb_message.callSendAPI(messageData);
+    return fb_message.callSendAPI(messageData);
 }
 
 var handleApiAiAction = function(sender, action, responseText, contexts, parameters) {
@@ -162,32 +162,30 @@ var groupMessages = function(messages) {
 };
 
 var handleMessage = function(message, sender) {
-    return new Promise((resolve, reject) => {
-        switch (message.type) {
-            case 0: //text
 
-                resolve(sendTextMessage(sender, message.speech));
-                break;
-            case 1:
-            case 4:
-                // custom payload
-                var messageData = {
-                    recipient: {
-                        id: sender
-                    },
-                    message: message.payload.facebook
-                };
+    switch (message.type) {
+        case 0: //text
+            return sendTextMessage(sender, message.speech);
+            break;
+        case 1:
+        case 4:
+            // custom payload
+            var messageData = {
+                recipient: {
+                    id: sender
+                },
+                message: message.payload.facebook
+            };
 
-                resolve(fb_message.callSendAPI(messageData));
-                break;
-            case 2: //quick replies
-                resolve(sendQuickReply(sender, message.text, message.quick_replies));
-                break;
-            case 3: //image
-                resolve(sendImageMessage(sender, message.imageUrl));
-                break;
-        }
-    });
+            return fb_message.callSendAPI(messageData);
+            break;
+        case 2: //quick replies
+            return sendQuickReply(sender, message.text, message.quick_replies);
+            break;
+        case 3: //image
+            return sendImageMessage(sender, message.imageUrl);
+            break;
+    }
 }
 
 var handleApiAiResponse = function(sender, response) {
@@ -230,11 +228,17 @@ var handleApiAiResponse = function(sender, response) {
         var formatMessages = formatMessage(messages);
         var groupedMessages = groupMessages(formatMessages);
         groupedMessages.reduce((promise, item) => {
-            return promise
-                .then((result) => {
-                    return handleMessage(item, sender);
-                })
-                .catch(console.error);
+            const waitForHandleMsg = new Promise(resolve => {
+                promise
+                    .then((result) => {
+                        // Đợi nó handle message done
+                        handleMessage(item, sender)
+                            .then(resolve)
+                    })
+                    .catch(console.error);
+            })
+
+            return waitForHandleMsg;
         }, Promise.resolve());
     } else if (responseText === '' && !isDefined(action)) {
         //api ai could not evaluate input.
